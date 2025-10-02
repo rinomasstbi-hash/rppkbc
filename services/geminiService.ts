@@ -1,7 +1,6 @@
+
 import { GoogleGenAI } from "@google/genai";
 import type { RPMInput } from '../types';
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
 
 function createPrompt(data: RPMInput): string {
   const {
@@ -117,10 +116,13 @@ function createPrompt(data: RPMInput): string {
 
 
 export const generateRPM = async (data: RPMInput): Promise<string> => {
-  const model = 'gemini-2.5-flash';
-  const prompt = createPrompt(data);
-
   try {
+    // Defer client initialization to prevent app crash on load
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+    
+    const model = 'gemini-2.5-flash';
+    const prompt = createPrompt(data);
+
     const response = await ai.models.generateContent({
       model: model,
       contents: prompt,
@@ -137,7 +139,11 @@ export const generateRPM = async (data: RPMInput): Promise<string> => {
     });
     return cleanedText;
   } catch (error) {
+    if (error instanceof ReferenceError && error.message.includes('process is not defined')) {
+      console.error("API Key not configured in deployment environment.", error);
+      throw new Error("Konfigurasi API Key tidak ditemukan di environment. Silakan hubungi administrator.");
+    }
     console.error("Error calling Gemini API:", error);
-    throw new Error("Failed to generate RPM from AI service.");
+    throw new Error("Gagal menghasilkan RPM dari layanan AI.");
   }
 };

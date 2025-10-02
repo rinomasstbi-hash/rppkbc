@@ -22,7 +22,8 @@ const App: React.FC = () => {
       setGeneratedRpm(result);
     } catch (e) {
       console.error(e);
-      setError('Gagal menghasilkan RPM. Silakan coba lagi.');
+      const message = e instanceof Error ? e.message : 'Gagal menghasilkan RPM. Silakan coba lagi.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
