@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Backend functions for RPM KBC Generator.",
   "dependencies": {
-    "@google/genai": "^0.1.0"
+    "@google/genai": "^0.14.0"
   },
   "devDependencies": {
     "@netlify/functions": "^2.0.2",

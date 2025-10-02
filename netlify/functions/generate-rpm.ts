@@ -34,118 +34,6 @@ interface RPMInput {
   graduateDimensions: GraduateDimension[];
 }
 
-// The prompt generation logic is moved to the backend function.
-function createPrompt(data: RPMInput): string {
-  const {
-    teacherName,
-    teacherNip,
-    className,
-    subject,
-    learningObjectives,
-    subjectMatter,
-    language,
-    meetings,
-    pedagogicalPractices,
-    graduateDimensions
-  } = data;
-
-  const practicesText = pedagogicalPractices
-    .map((practice, index) => `Pertemuan ${index + 1}: ${practice}`)
-    .join(', ');
-
-  return `
-    Anda adalah asisten ahli dalam pembuatan Rencana Pembelajaran Mendalam (RPM) untuk kurikulum madrasah di Indonesia, khususnya untuk MTsN 4 Jombang.
-
-    Berdasarkan input berikut:
-    - Nama Guru: ${teacherName}
-    - NIP Guru: ${teacherNip}
-    - Kelas: ${className}
-    - Mata Pelajaran: ${subject}
-    - Tujuan Pembelajaran: ${learningObjectives}
-    - Materi Pelajaran: ${subjectMatter}
-    - Bahasa Pembuka/Penutup: ${language}
-    - Jumlah Pertemuan: ${meetings}
-    - Praktik Pedagogis per Pertemuan: ${practicesText}
-    - Dimensi Lulusan: ${graduateDimensions.join(', ')}
-
-    Tugas Anda adalah membuat dokumen RPM yang lengkap, terstruktur, dan siap pakai dalam format HTML. Ikuti struktur dan instruksi di bawah ini dengan SANGAT TELITI menggunakan Ejaan Bahasa Indonesia yang baik dan benar.
-
-    **ATURAN KRITIS UNTUK WARNA TEKS:**
-    - Semua teks HARUS berwarna gelap (hitam atau abu-abu sangat gelap, contoh: #000000 atau #333333).
-    - JANGAN PERNAH menggunakan teks berwarna putih, kuning, atau warna terang lainnya.
-    - JANGAN PERNAH menyertakan properti CSS \`color: ...\` dengan nilai warna terang (misalnya, \`color: white\`) di dalam atribut \`style\` mana pun. Teks harus terlihat jelas di atas latar belakang putih.
-
-    Jangan gunakan sintaks Markdown seperti **teks tebal** di dalam output HTML Anda; sebagai gantinya, gunakan tag HTML yang sesuai seperti \`<b>\` atau \`<strong>\`.
-
-    **STRUKTUR OUTPUT HTML UTAMA:**
-
-    Gunakan sebuah div kontainer utama dengan gaya \`style="color: #000;"\`. Di dalamnya, buatlah struktur berikut:
-
-    1.  **Tabel RPM (Dua Kolom):** Buat sebuah tabel HTML (\`<table>\`) dengan kelas 'w-full border-collapse'. Kolom pertama adalah "Komponen" dan kedua "Isi". 
-        - Gunakan \`<thead>\` untuk header.
-        - Gunakan \`<tbody>\` untuk konten.
-        - Untuk setiap baris komponen, gunakan \`<tr>\`.
-        - Kolom "Komponen" (\`<td>\`) harus bold dan rata atas (\`style="font-weight: bold; vertical-align: top; width: 30%; padding: 8px; border: 1px solid #ddd;"\`).
-        - Kolom "Isi" (\`<td>\`) harus rata kanan-kiri (\`style="text-align: justify; padding: 8px; border: 1px solid #ddd;"\`).
-        - Untuk header seksi seperti "IDENTITAS", gunakan \`<tr style="background-color: #f2f2f2;"><td colspan="2" style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">NAMA SEKSI</td></tr>\`.
-
-    **Isi Tabel RPM:**
-
-    a. **IDENTITAS**
-       - Nama Madrasah: MTsN 4 Jombang
-       - Mata Pelajaran: ${subject}
-       - Kelas/Semester: ${className} / [Generate semester ganjil/genap secara logis]
-       - Durasi Pertemuan: ${meetings} x (2 x 40 menit)
-
-    b. **IDENTIFIKASI**
-       - Siswa: Generate deskripsi singkat karakteristik umum siswa kelas ${className} di madrasah tsanawiyah.
-       - Materi Pelajaran: ${subjectMatter}
-       - Capaian Dimensi Lulusan: ${graduateDimensions.join(', ')}
-       - Topik Panca Cinta: Pilih 2-3 dimensi Kurikulum Berbasis Cinta (KBC) yang paling relevan dari [Cinta Allah dan Rasul-Nya, Cinta Ilmu, Cinta Lingkungan, Cinta Diri dan Sesama, Cinta Tanah Air] berdasarkan materi pelajaran.
-       - Materi Insersi: Untuk setiap Topik Panca Cinta yang dipilih, tuliskan satu kalimat singkat yang menggambarkan nilai cinta yang diintegrasikan dalam pembelajaran.
-
-    c. **DESAIN PEMBELAJARAN**
-       - Lintas Disiplin Ilmu: Generate 1-2 disiplin ilmu lain yang relevan dengan materi.
-       - Tujuan Pembelajaran: ${learningObjectives}
-       - Topik Pembelajaran: Buat judul topik yang lebih spesifik dan menarik dari input 'Materi Pelajaran'.
-       - Praktik Pedagogis per Pertemuan: ${practicesText}
-       - Kemitraan Pembelajaran: Generate saran kemitraan yang relevan (misal: orang tua, perpustakaan sekolah).
-       - Lingkungan Pembelajaran: Generate saran lingkungan belajar yang sesuai (misal: di dalam kelas, di luar kelas, laboratorium).
-       - Pemanfaatan Digital: Generate saran tools digital relevan beserta tautan (contoh: Quizizz, Canva, YouTube).
-
-    d. **PENGALAMAN BELAJAR**
-       - Memahami (berkesadaran, bermakna, menggembirakan): Generate langkah-langkah kegiatan awal. **Mulai kegiatan awal ini dengan salam pembuka yang sesuai dalam ${language}.** Setelah menjelaskan tujuan, tambahkan satu paragraf singkat untuk membangun koneksi emosional siswa dengan mengaitkan materi pada salah satu nilai KBC.
-       - Mengaplikasi (berkesadaran, bermakna, menggembirakan): Generate langkah-langkah kegiatan inti detail sesuai sintaks dari praktik pedagogis (${practicesText}). Tambahkan instruksi spesifik untuk mendorong refleksi nilai KBC dalam aktivitas.
-       - Refleksi (berkesadaran, bermakna, menggembirakan): Generate langkah-langkah kegiatan penutup. **Akhiri kegiatan penutup ini dengan salam penutup yang sesuai dalam ${language}.**
-
-    e. **ASESMEN PEMBELAJARAN**
-       - Asesmen Awal (diagnostik/apersepsi): Jelaskan metode asesmen awal (misal: pertanyaan pemantik lisan).
-       - Asesmen Formatif (for/as learning): Jelaskan metode asesmen formatif (misal: observasi, penilaian LKPD).
-       - Asesmen Sumatif (of learning): Jelaskan metode asesmen sumatif (misal: tes tulis, penilaian proyek).
-
-    2.  **Tanda Tangan:** Setelah tabel utama, buatlah sebuah tabel baru untuk bagian tanda tangan dengan gaya \`<table style="width: 100%; margin-top: 40px; border: none;">\`. Tabel ini harus memiliki satu baris (\`<tr>\`) dan dua kolom (\`<td>\`).
-        - Kolom kiri: \`<td style="width: 50%; vertical-align: top; border: none;">Mengetahui,<br/>Kepala MTsN 4 Jombang<br/><br/><br/><br/><b>Sulthon Sulaiman, M.Pd.I.</b><br/>NIP. 19810616 2005011003</td>\`
-        - Kolom kanan: \`<td style="width: 50%; vertical-align: top; border: none;">Jombang, [Generate tanggal hari ini format DD MMMM YYYY]<br/>Guru Mata Pelajaran<br/><br/><br/><br/><b>${teacherName}</b><br/>NIP. ${teacherNip}</td>\`
-
-    3.  **LAMPIRAN:** Gunakan \`<div style="page-break-before: always;">\` untuk memulai di halaman baru.
-        - \`<h2>Lampiran</h2>\`
-        - **Lampiran 1: Lembar Kerja Peserta Didik (LKPD)** (Buat LKPD yang LENGKAP)
-          - \`<h3>A. Identitas</h3>\` (Nama, Kelas, No. Absen, dll.)
-          - \`<h3>B. Petunjuk Penggunaan</h3>\`
-          - \`<h3>C. Kegiatan Pembelajaran</h3>\` (Integrasikan sintaks dan pengalaman belajar tanpa tabel)
-            - \`<h4>1. Memahami</h4>\` (Sajikan materi singkat + 3 pertanyaan pemahaman)
-            - \`<h4>2. Mengaplikasikan</h4>\` (1 tugas studi kasus nyata + instruksi)
-            - \`<h4>3. Merefleksikan</h4>\` (2-3 pertanyaan refleksi)
-          - \`<h3>D. Penutup</h3>\` (Kata penyemangat + checklist pemahaman diri)
-        - **Lampiran 2: Instrumen Asesmen**
-          - \`<h4>Asesmen Awal</h4>\` (Buat 5 soal [pilih tipe soal yang sesuai] beserta kunci jawabannya)
-          - \`<h4>Rubrik Penilaian Sikap</h4>\` (Buat tabel HTML 4x5 untuk menilai sikap)
-          - \`<h4>Rubrik Penilaian Pengetahuan</h4>\` (Buat tabel HTML 4x5 untuk menilai pengetahuan)
-          - \`<h4>Rubrik Penilaian Keterampilan</h4>\` (Buat tabel HTML 4x5 untuk menilai keterampilan)
-
-    Pastikan seluruh output adalah satu blok kode HTML yang valid dan rapi.
-    `;
-}
 
 const handler: Handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -163,12 +51,82 @@ const handler: Handler = async (event) => {
   try {
     const data: RPMInput = JSON.parse(event.body || '{}');
     const ai = new GoogleGenAI({ apiKey });
-    const model = 'gemini-2.5-flash';
-    const prompt = createPrompt(data);
+    
+    const systemInstruction = `Anda adalah asisten ahli dalam pembuatan Rencana Pembelajaran Mendalam (RPM) untuk kurikulum madrasah di Indonesia. Tugas Anda adalah membuat dokumen RPM yang lengkap dan siap pakai dalam format HTML berdasarkan data yang diberikan pengguna.
+
+**ATURAN OUTPUT HTML YANG KETAT:**
+1.  **Format Wajib:** Seluruh output HARUS berupa satu blok kode HTML yang valid. Jangan sertakan \`\`\`html atau markdown lainnya.
+2.  **Warna Teks:** Semua teks HARUS berwarna gelap (hitam atau #333333) agar dapat dicetak dengan baik. JANGAN PERNAH menggunakan \`color: white\` atau warna terang lainnya pada styling.
+3.  **Styling:** Gunakan tag HTML seperti \`<b>\` untuk teks tebal, bukan sintaks Markdown.
+4.  **Bahasa:** Gunakan Ejaan Bahasa Indonesia (EBI) yang baik dan benar.
+
+**DETAIL STRUKTUR & KONTEN HTML:**
+
+1.  **Kontainer Utama:** Gunakan sebuah div kontainer utama dengan gaya \`style="color: #000;"\`.
+
+2.  **Tabel RPM Utama (\`<table class='w-full border-collapse'>\`):**
+    -   Terdiri dari dua kolom: "Komponen" (lebar 30%, bold, rata atas) dan "Isi" (rata kanan-kiri).
+    -   Gaya sel: \`padding: 8px; border: 1px solid #ddd;\`.
+    -   Header seksi (IDENTITAS, dll.) menggunakan \`<tr style="background-color: #f2f2f2;"><td colspan="2" style="font-weight: bold; ...">\`.
+    -   **Isi Seksi:**
+        -   **IDENTITAS:**
+            -   Nama Madrasah: MTsN 4 Jombang
+            -   Kelas/Semester: [Kelas dari input] / [Generate semester ganjil/genap secara logis]
+            -   Durasi Pertemuan: [Jumlah dari input] x (2 x 40 menit)
+        -   **IDENTIFIKASI:**
+            -   Siswa: Generate deskripsi singkat karakteristik umum siswa kelas tersebut.
+            -   Topik Panca Cinta: Pilih 2-3 dimensi KBC yang paling relevan dari [Cinta Allah dan Rasul-Nya, Cinta Ilmu, Cinta Lingkungan, Cinta Diri dan Sesama, Cinta Tanah Air].
+            -   Materi Insersi: Tuliskan satu kalimat singkat integrasi nilai untuk setiap Topik Panca Cinta yang dipilih.
+        -   **DESAIN PEMBELAJARAN:**
+            -   Lintas Disiplin Ilmu: Generate 1-2 disiplin ilmu lain yang relevan.
+            -   Topik Pembelajaran: Buat judul topik yang menarik dari materi pelajaran.
+            -   Kemitraan & Lingkungan: Generate saran relevan.
+            -   Pemanfaatan Digital: Generate saran tools digital relevan beserta tautan.
+        -   **PENGALAMAN BELAJAR:**
+            -   Memahami (Kegiatan Awal): Mulai dengan salam pembuka dalam bahasa yang diminta. Tambahkan paragraf koneksi emosional KBC.
+            -   Mengaplikasi (Kegiatan Inti): Detailkan langkah sesuai sintaks praktik pedagogis yang diberikan.
+            -   Refleksi (Kegiatan Penutup): Akhiri dengan salam penutup dalam bahasa yang diminta.
+        -   **ASESMEN PEMBELAJARAN:** Jelaskan metode untuk asesmen Awal, Formatif, dan Sumatif.
+
+3.  **Tabel Tanda Tangan (\`<table style="width: 100%; margin-top: 40px; border: none;">\`):**
+    -   Kolom kiri: Mengetahui, Kepala MTsN 4 Jombang (Sulthon Sulaiman, M.Pd.I., NIP. 19810616 2005011003).
+    -   Kolom kanan: Jombang, [Generate tanggal hari ini format DD MMMM YYYY], Guru Mata Pelajaran ([Nama Guru], NIP. [NIP Guru]).
+
+4.  **LAMPIRAN (Gunakan \`<div style="page-break-before: always;">\`):**
+    -   **Lampiran 1: LKPD:** Harus LENGKAP dengan bagian Identitas, Petunjuk, Kegiatan Pembelajaran (Memahami, Mengaplikasikan, Merefleksikan dengan tugas dan pertanyaan konkret), dan Penutup.
+    -   **Lampiran 2: Instrumen Asesmen:**
+        -   Asesmen Awal: Buat 5 soal (tipe soal sesuai materi) beserta kunci jawabannya.
+        -   Rubrik Penilaian: Buat 3 tabel HTML terpisah (4x5) untuk rubrik penilaian Sikap, Pengetahuan, dan Keterampilan.`;
+
+    const userPrompt = `
+      Buatkan saya RPM HTML berdasarkan data berikut. Ikuti semua aturan dan struktur yang diberikan dalam System Instruction.
+
+      **DATA INPUT:**
+      - Nama Guru: ${data.teacherName}
+      - NIP Guru: ${data.teacherNip}
+      - Kelas: ${data.className}
+      - Mata Pelajaran: ${data.subject}
+      - Tujuan Pembelajaran: ${data.learningObjectives}
+      - Materi Pelajaran: ${data.subjectMatter}
+      - Bahasa Pembuka/Penutup: ${data.language}
+      - Jumlah Pertemuan: ${data.meetings}
+      - Praktik Pedagogis per Pertemuan: ${data.pedagogicalPractices.map((p, i) => `Pertemuan ${i + 1}: ${p}`).join(', ')}
+      - Dimensi Lulusan: ${data.graduateDimensions.join(', ')}
+
+      **PENGINGAT STRUKTUR UTAMA YANG DIMINTA:**
+      1.  **Tabel RPM Utama:** Dengan seksi IDENTITAS, IDENTIFIKASI, DESAIN PEMBELAJARAN, PENGALAMAN BELAJAR, ASESMEN PEMBELAJARAN.
+      2.  **Tabel Tanda Tangan:** Untuk Kepala Sekolah dan Guru.
+      3.  **Lampiran (di halaman baru):** Lampiran 1 (LKPD) dan Lampiran 2 (Instrumen Asesmen).
+      
+      Pastikan untuk men-generate konten untuk semua bagian yang diminta (misalnya deskripsi siswa, Topik Panca Cinta, asesmen, isi LKPD, dan rubrik).
+    `;
 
     const response = await ai.models.generateContent({
-      model: model,
-      contents: prompt,
+      model: 'gemini-2.5-flash',
+      contents: userPrompt,
+      config: {
+          systemInstruction: systemInstruction,
+      }
     });
 
     let cleanedText = response.text.replace(/^```html\s*/, '').replace(/\s*```$/, '');
