@@ -185,10 +185,26 @@ const handler: Handler = async (event) => {
     };
   } catch (error) {
     console.error("Error in Netlify function:", error);
-    const errorMessage = error instanceof Error ? error.message : "Terjadi kesalahan internal pada server AI.";
+    let userFriendlyMessage = "Terjadi kesalahan internal pada server AI.";
+
+    if (error instanceof Error) {
+        const errorMessage = error.message.toLowerCase();
+        if (errorMessage.includes('api key not valid')) {
+            userFriendlyMessage = "API Key yang Anda gunakan tidak valid. Mohon periksa kembali kunci Anda di pengaturan environment Netlify.";
+        } else if (errorMessage.includes('billing') || errorMessage.includes('billing account')) {
+            userFriendlyMessage = "Proyek Google Cloud Anda tidak memiliki akun penagihan (billing) yang aktif. Gemini API memerlukannya untuk berfungsi. Silakan aktifkan penagihan di Google Cloud Console.";
+        } else if (errorMessage.includes('permission denied') || errorMessage.includes('generative language api has not been used')) {
+             userFriendlyMessage = "API Key tidak memiliki izin yang diperlukan. Pastikan 'Generative Language API' telah diaktifkan di Google Cloud Console Anda.";
+        } else if (errorMessage.includes('quota')) {
+            userFriendlyMessage = "Anda telah melebihi kuota penggunaan API. Silakan coba lagi nanti atau periksa kuota Anda di Google Cloud Console.";
+        } else {
+            userFriendlyMessage = error.message; // Fallback to the original, more technical message if it's a different issue.
+        }
+    }
+    
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: `Gagal menghasilkan RPM dari layanan AI: ${errorMessage}` }),
+      body: JSON.stringify({ error: `Gagal menghasilkan RPM dari layanan AI: ${userFriendlyMessage}` }),
     };
   }
 };
